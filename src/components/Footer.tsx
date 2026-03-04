@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Instagram, MapPin, Mail, Clock } from "lucide-react";
+import { Instagram, MapPin, Mail, Clock, Lock } from "lucide-react";
+import logo from "@/assets/logo.jpg";
 
 const Footer = () => {
   return (
@@ -8,9 +9,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Brand */}
           <div>
-            <h3 className="font-heading text-2xl font-bold text-primary mb-3">
-              Glivyz Cakes & Events
-            </h3>
+            <div className="flex items-center gap-3 mb-3">
+              <img src={logo} alt="Glivyz Cakes & Events" className="h-12 w-auto rounded-full" />
+              <h3 className="font-heading text-2xl font-bold text-primary">
+                Glivyz Cakes & Events
+              </h3>
+            </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Premium bakery, catering services, and baking school in Lagos, Nigeria. 
               Making every celebration sweeter since day one.
@@ -25,6 +29,10 @@ const Footer = () => {
               <Link to="/gallery" className="text-sm text-muted-foreground hover:text-primary transition-colors">Gallery</Link>
               <Link to="/apply" className="text-sm text-muted-foreground hover:text-primary transition-colors">Baking School</Link>
               <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</Link>
+              <Link to="/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5">
+                <Lock size={12} />
+                Admin Login
+              </Link>
             </div>
           </div>
 

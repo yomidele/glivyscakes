@@ -1,61 +1,140 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, Image, Users, Settings, Download } from "lucide-react";
+import { LogOut, Image as ImageIcon, Users, Settings, Download, Upload, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/logo.jpg";
 
 interface Application {
   id: string;
-  fullName: string;
+  full_name: string;
   email: string;
   phone: string;
   course: string;
-  startDate: string;
+  start_date: string;
   notes: string;
-  submittedAt: string;
+  created_at: string;
+}
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  category: string;
+  image_url: string;
+  media_type: string;
+  created_at: string;
 }
 
 const Admin = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState<"applications" | "gallery" | "settings">("applications");
   const [applications, setApplications] = useState<Application[]>([]);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const session = sessionStorage.getItem("glivyz_admin");
-    if (session === "true") setIsLoggedIn(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn) {
-      const apps = JSON.parse(localStorage.getItem("glivyz_applications") || "[]");
-      setApplications(apps);
+    if (session) {
+      fetchApplications();
+      fetchGallery();
     }
-  }, [isLoggedIn]);
+  }, [session]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const fetchApplications = async () => {
+    const { data, error } = await supabase.from("applications").select("*").order("created_at", { ascending: false });
+    if (data) setApplications(data);
+    if (error) toast.error("Failed to load applications");
+  };
+
+  const fetchGallery = async () => {
+    const { data, error } = await supabase.from("gallery").select("*").order("created_at", { ascending: false });
+    if (data) setGalleryItems(data);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // NOTE: This is temporary client-side auth. For production, use Lovable Cloud auth.
-    if (email === "yomidele2120@gmail.com" && password === "Kikelomo2120") {
-      sessionStorage.setItem("glivyz_admin", "true");
-      setIsLoggedIn(true);
-      toast.success("Welcome back, Admin!");
-    } else {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
       toast.error("Invalid credentials");
+    } else {
+      toast.success("Welcome back, Admin!");
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("glivyz_admin");
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const mediaType = file.type.startsWith("video") ? "video" : "image";
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("gallery")
+      .upload(fileName, file);
+
+    if (uploadError) {
+      toast.error("Upload failed: " + uploadError.message);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage.from("gallery").getPublicUrl(fileName);
+
+    const { error: insertError } = await supabase.from("gallery").insert({
+      title: file.name.replace(/\.[^/.]+$/, ""),
+      category: "Cakes",
+      image_url: publicUrl,
+      media_type: mediaType,
+    });
+
+    if (insertError) {
+      toast.error("Failed to save to gallery");
+    } else {
+      toast.success("Uploaded successfully!");
+      fetchGallery();
+    }
+    e.target.value = "";
+  };
+
+  const handleDeleteGalleryItem = async (item: GalleryItem) => {
+    const fileName = item.image_url.split("/").pop();
+    if (fileName) {
+      await supabase.storage.from("gallery").remove([fileName]);
+    }
+    const { error } = await supabase.from("gallery").delete().eq("id", item.id);
+    if (error) {
+      toast.error("Failed to delete");
+    } else {
+      toast.success("Deleted!");
+      fetchGallery();
+    }
   };
 
   const exportApplications = () => {
     const csv = [
       "Full Name,Email,Phone,Course,Start Date,Notes,Submitted At",
       ...applications.map((a) =>
-        `"${a.fullName}","${a.email}","${a.phone}","${a.course}","${a.startDate}","${a.notes || ""}","${a.submittedAt}"`
+        `"${a.full_name}","${a.email}","${a.phone}","${a.course}","${a.start_date}","${a.notes || ""}","${a.created_at}"`
       ),
     ].join("\n");
 
@@ -69,7 +148,15 @@ const Admin = () => {
     toast.success("Applications exported!");
   };
 
-  if (!isLoggedIn) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <motion.div
@@ -77,6 +164,9 @@ const Admin = () => {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-sm"
         >
+          <div className="flex justify-center mb-4">
+            <img src={logo} alt="Glivyz Cakes" className="h-16 w-auto rounded-full" />
+          </div>
           <h1 className="font-heading text-2xl font-bold text-center mb-6">Admin Login</h1>
           <form onSubmit={handleLogin} className="space-y-4">
             <input
@@ -109,9 +199,11 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Admin Header */}
       <header className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <h1 className="font-heading text-lg font-bold text-primary">Glivyz Admin</h1>
+        <div className="flex items-center gap-2">
+          <img src={logo} alt="Glivyz" className="h-8 w-auto rounded-full" />
+          <h1 className="font-heading text-lg font-bold text-primary">Glivyz Admin</h1>
+        </div>
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -122,11 +214,10 @@ const Admin = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-border">
           {[
             { key: "applications" as const, label: "Applications", icon: Users },
-            { key: "gallery" as const, label: "Gallery", icon: Image },
+            { key: "gallery" as const, label: "Gallery", icon: ImageIcon },
             { key: "settings" as const, label: "Settings", icon: Settings },
           ].map(({ key, label, icon: Icon }) => (
             <button
@@ -144,7 +235,6 @@ const Admin = () => {
           ))}
         </div>
 
-        {/* Applications Tab */}
         {activeTab === "applications" && (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -180,13 +270,13 @@ const Admin = () => {
                   <tbody>
                     {applications.map((app) => (
                       <tr key={app.id} className="border-t border-border">
-                        <td className="px-4 py-3">{app.fullName}</td>
+                        <td className="px-4 py-3">{app.full_name}</td>
                         <td className="px-4 py-3 text-muted-foreground">{app.email}</td>
                         <td className="px-4 py-3 text-muted-foreground">{app.phone}</td>
                         <td className="px-4 py-3">{app.course}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{app.startDate}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{app.start_date}</td>
                         <td className="px-4 py-3 text-muted-foreground">
-                          {new Date(app.submittedAt).toLocaleDateString()}
+                          {new Date(app.created_at).toLocaleDateString()}
                         </td>
                       </tr>
                     ))}
@@ -197,23 +287,51 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Gallery Tab */}
         {activeTab === "gallery" && (
-          <div className="text-center py-16">
-            <Image size={48} className="mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-heading text-lg font-semibold mb-2">Gallery Management</h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              To enable gallery uploads and dynamic media management, we need to connect to Lovable Cloud for file storage. This feature will be available once the backend is set up.
-            </p>
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-heading text-xl font-semibold">Gallery Management</h2>
+              <label className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity">
+                <Upload size={16} />
+                Upload Media
+                <input type="file" accept="image/*,video/*" onChange={handleGalleryUpload} className="hidden" />
+              </label>
+            </div>
+
+            {galleryItems.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-10 text-center">No gallery items yet. Upload your first image or video above.</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {galleryItems.map((item) => (
+                  <div key={item.id} className="relative group rounded-lg overflow-hidden border border-border">
+                    {item.media_type === "video" ? (
+                      <video src={item.image_url} className="w-full aspect-square object-cover" />
+                    ) : (
+                      <img src={item.image_url} alt={item.title} className="w-full aspect-square object-cover" />
+                    )}
+                    <div className="absolute inset-0 bg-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        onClick={() => handleDeleteGalleryItem(item)}
+                        className="bg-destructive text-destructive-foreground p-2 rounded-lg"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-background/80 px-2 py-1">
+                      <p className="text-xs truncate">{item.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="max-w-md space-y-4">
             <h3 className="font-heading text-lg font-semibold mb-4">Business Settings</h3>
             <p className="text-sm text-muted-foreground">
-              Settings management (WhatsApp number, social links, contact info) will be available once Lovable Cloud is connected for persistent storage.
+              Contact info and social links are managed in the site configuration. Contact the developer to update these settings.
             </p>
           </div>
         )}

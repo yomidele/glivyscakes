@@ -57,7 +57,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://wa.me/234XXXXXXXXXX?text=Hello%20Glivyz%20Cakes!%20I%20would%20like%20to%20book%20a%20catering%20service."
+                href="https://wa.me/2348051306562?text=Hello%20Glivyz%20Cakes!%20I%20would%20like%20to%20book%20a%20catering%20service."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-primary text-primary-foreground px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const courses = [
   "Cake Baking & Decoration",
@@ -25,20 +26,27 @@ const ApplicationForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // For now, save to localStorage (will use Cloud database later)
-    const applications = JSON.parse(localStorage.getItem("glivyz_applications") || "[]");
-    applications.push({ ...formData, submittedAt: new Date().toISOString(), id: Date.now().toString() });
-    localStorage.setItem("glivyz_applications", JSON.stringify(applications));
+    const { error } = await supabase.from("applications").insert({
+      full_name: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      course: formData.course,
+      start_date: formData.startDate,
+      notes: formData.notes,
+    });
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setIsSubmitting(false);
+
+    if (error) {
+      toast.error("Failed to submit application. Please try again.");
+    } else {
       toast.success("Application submitted successfully! We'll contact you soon.");
       setFormData({ fullName: "", email: "", phone: "", course: "", startDate: "", notes: "" });
-    }, 800);
+    }
   };
 
   return (

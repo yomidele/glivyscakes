@@ -27,7 +27,7 @@ const HeroSection = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://wa.me/234XXXXXXXXXX?text=Hello%20Glivyz%20Cakes!%20I%20would%20like%20to%20book%20a%20catering%20service.%0A%0AEvent%20Type:%0ADate:%0ANumber%20of%20Guests:%0AMenu%20Preferences:"
+              href="https://wa.me/2348051306562?text=Hello%20Glivyz%20Cakes!%20I%20would%20like%20to%20book%20a%20catering%20service.%0A%0AEvent%20Type:%0ADate:%0ANumber%20of%20Guests:%0AMenu%20Preferences:"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-primary text-primary-foreground px-8 py-4 rounded-lg text-base font-semibold hover:opacity-90 transition-all shadow-warm inline-flex items-center justify-center gap-2"
