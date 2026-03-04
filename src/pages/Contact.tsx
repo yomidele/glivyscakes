@@ -62,7 +62,7 @@ const Contact = () => {
                 <div>
                   <h3 className="font-semibold text-sm mb-1">WhatsApp</h3>
                   <a
-                    href="https://wa.me/234XXXXXXXXXX"
+                    href="https://wa.me/2348051306562"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -109,7 +109,7 @@ const Contact = () => {
               </div>
 
               <a
-                href="https://wa.me/234XXXXXXXXXX?text=Hello%20Glivyz%20Cakes!%20I%20have%20an%20inquiry."
+                href="https://wa.me/2348051306562?text=Hello%20Glivyz%20Cakes!%20I%20have%20an%20inquiry."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-8 w-full bg-primary text-primary-foreground py-3.5 rounded-lg font-semibold text-center hover:opacity-90 transition-opacity block"
