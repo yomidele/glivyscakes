@@ -27,7 +27,7 @@ const services = [
     image: lunchPacks,
   },
   {
-    title: "Baking School",
+    title: "Training",
     description: "Learn professional baking and cake decoration from experienced instructors.",
     image: bakingSchool,
   },

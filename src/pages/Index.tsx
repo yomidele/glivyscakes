@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ServicesSection from "@/components/ServicesSection";
 import GalleryGrid from "@/components/GalleryGrid";
+import CakePriceEstimator from "@/components/CakePriceEstimator";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -12,6 +13,26 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <ServicesSection />
+
+      {/* Cake Price Estimator */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <h2 className="font-heading text-3xl md:text-5xl font-bold mb-4">
+              Instant <span className="text-gradient-gold">Cake Pricing</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Get an instant price estimate for your dream cake.
+            </p>
+          </motion.div>
+          <CakePriceEstimator />
+        </div>
+      </section>
 
       {/* Gallery Preview */}
       <section className="py-20 bg-card">
@@ -68,7 +89,7 @@ const Index = () => {
                 to="/apply"
                 className="bg-gold text-gold-foreground px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
               >
-                Join Baking School
+                Join Training
               </Link>
             </div>
           </motion.div>
