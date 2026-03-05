@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.jpg";
 
@@ -8,13 +8,38 @@ const navLinks = [
   { to: "/", label: "Home" },
   { to: "/services", label: "Services" },
   { to: "/gallery", label: "Gallery" },
-  { to: "/apply", label: "Baking School" },
+  { to: "/apply", label: "Training" },
   { to: "/contact", label: "Contact" },
+];
+
+const WA_NUMBER = "2348051306562";
+
+const bookingOptions = [
+  {
+    label: "Book Baking Service",
+    message: "Hello, I would like to book your baking service from Glivyz Cakes and Events.",
+  },
+  {
+    label: "Book Catering Service",
+    message: "Hello, I would like to book your catering service from Glivyz Cakes and Events.",
+  },
 ];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [bookMenuOpen, setBookMenuOpen] = useState(false);
   const location = useLocation();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setBookMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
@@ -41,14 +66,39 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <a
-            href="https://wa.me/2348051306562?text=Hello%20Glivyz%20Cakes!%20I%20would%20like%20to%20book%20a%20catering%20service."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
-            Book Catering
-          </a>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setBookMenuOpen(!bookMenuOpen)}
+              className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-1.5"
+            >
+              Book Service
+              <ChevronDown size={16} className={`transition-transform ${bookMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+            <AnimatePresence>
+              {bookMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-warm overflow-hidden z-50"
+                >
+                  {bookingOptions.map((opt) => (
+                    <a
+                      key={opt.label}
+                      href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(opt.message)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setBookMenuOpen(false)}
+                      className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                    >
+                      {opt.label}
+                    </a>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Mobile Toggle */}
@@ -85,14 +135,21 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <a
-                href="https://wa.me/2348051306562?text=Hello%20Glivyz%20Cakes!%20I%20would%20like%20to%20book%20a%20catering%20service."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold text-center"
-              >
-                Book Catering
-              </a>
+              <div className="border-t border-border pt-3 flex flex-col gap-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Book Service</p>
+                {bookingOptions.map((opt) => (
+                  <a
+                    key={opt.label}
+                    href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(opt.message)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold text-center"
+                  >
+                    {opt.label}
+                  </a>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, Image as ImageIcon, Users, Settings, Download, Upload, Trash2 } from "lucide-react";
+import { LogOut, Image as ImageIcon, Users, Settings, Download, Upload, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
@@ -26,23 +26,39 @@ interface GalleryItem {
   created_at: string;
 }
 
+interface CateringQuote {
+  id: string;
+  full_name: string;
+  phone: string;
+  email: string;
+  event_type: string;
+  event_date: string;
+  num_guests: number;
+  location: string;
+  budget_range: string;
+  notes: string;
+  created_at: string;
+}
+
 const Admin = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [activeTab, setActiveTab] = useState<"applications" | "gallery" | "settings">("applications");
+  const [activeTab, setActiveTab] = useState<"applications" | "quotes" | "gallery" | "settings">("applications");
   const [applications, setApplications] = useState<Application[]>([]);
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [cateringQuotes, setCateringQuotes] = useState<CateringQuote[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoading(false);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -51,6 +67,7 @@ const Admin = () => {
     if (session) {
       fetchApplications();
       fetchGallery();
+      fetchCateringQuotes();
     }
   }, [session]);
 
@@ -61,8 +78,14 @@ const Admin = () => {
   };
 
   const fetchGallery = async () => {
-    const { data, error } = await supabase.from("gallery").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("gallery").select("*").order("created_at", { ascending: false });
     if (data) setGalleryItems(data);
+  };
+
+  const fetchCateringQuotes = async () => {
+    const { data, error } = await supabase.from("catering_quotes").select("*").order("created_at", { ascending: false });
+    if (data) setCateringQuotes(data as CateringQuote[]);
+    if (error) toast.error("Failed to load catering quotes");
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -88,10 +111,7 @@ const Admin = () => {
     const fileName = `${Date.now()}.${fileExt}`;
     const mediaType = file.type.startsWith("video") ? "video" : "image";
 
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("gallery")
-      .upload(fileName, file);
+    const { error: uploadError } = await supabase.storage.from("gallery").upload(fileName, file);
 
     if (uploadError) {
       toast.error("Upload failed: " + uploadError.message);
@@ -146,6 +166,24 @@ const Admin = () => {
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Applications exported!");
+  };
+
+  const exportQuotes = () => {
+    const csv = [
+      "Full Name,Phone,Email,Event Type,Event Date,Guests,Location,Budget,Notes,Submitted At",
+      ...cateringQuotes.map((q) =>
+        `"${q.full_name}","${q.phone}","${q.email}","${q.event_type}","${q.event_date}","${q.num_guests}","${q.location}","${q.budget_range}","${q.notes || ""}","${q.created_at}"`
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `catering-quotes-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Catering quotes exported!");
   };
 
   if (loading) {
@@ -214,16 +252,17 @@ const Admin = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        <div className="flex gap-2 mb-6 border-b border-border">
+        <div className="flex gap-2 mb-6 border-b border-border overflow-x-auto">
           {[
-            { key: "applications" as const, label: "Applications", icon: Users },
+            { key: "applications" as const, label: "Training Applications", icon: Users },
+            { key: "quotes" as const, label: "Catering Quotes", icon: FileText },
             { key: "gallery" as const, label: "Gallery", icon: ImageIcon },
             { key: "settings" as const, label: "Settings", icon: Settings },
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px whitespace-nowrap ${
                 activeTab === key
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
@@ -239,7 +278,7 @@ const Admin = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-heading text-xl font-semibold">
-                Student Applications ({applications.length})
+                Training Applications ({applications.length})
               </h2>
               {applications.length > 0 && (
                 <button
@@ -277,6 +316,63 @@ const Admin = () => {
                         <td className="px-4 py-3 text-muted-foreground">{app.start_date}</td>
                         <td className="px-4 py-3 text-muted-foreground">
                           {new Date(app.created_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "quotes" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-heading text-xl font-semibold">
+                Catering Quotes ({cateringQuotes.length})
+              </h2>
+              {cateringQuotes.length > 0 && (
+                <button
+                  onClick={exportQuotes}
+                  className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  <Download size={16} />
+                  Export CSV
+                </button>
+              )}
+            </div>
+
+            {cateringQuotes.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-10 text-center">No catering quote requests yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border border-border rounded-lg overflow-hidden">
+                  <thead className="bg-secondary">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-medium">Name</th>
+                      <th className="text-left px-4 py-3 font-medium">Event</th>
+                      <th className="text-left px-4 py-3 font-medium">Date</th>
+                      <th className="text-left px-4 py-3 font-medium">Guests</th>
+                      <th className="text-left px-4 py-3 font-medium">Budget</th>
+                      <th className="text-left px-4 py-3 font-medium">Location</th>
+                      <th className="text-left px-4 py-3 font-medium">Submitted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cateringQuotes.map((q) => (
+                      <tr key={q.id} className="border-t border-border">
+                        <td className="px-4 py-3">
+                          <div>{q.full_name}</div>
+                          <div className="text-xs text-muted-foreground">{q.email}</div>
+                        </td>
+                        <td className="px-4 py-3">{q.event_type}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{q.event_date}</td>
+                        <td className="px-4 py-3">{q.num_guests}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{q.budget_range || "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{q.location}</td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {new Date(q.created_at).toLocaleDateString()}
                         </td>
                       </tr>
                     ))}

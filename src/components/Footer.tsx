@@ -16,7 +16,7 @@ const Footer = () => {
               </h3>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Premium bakery, catering services, and baking school in Lagos, Nigeria. 
+              Premium bakery, catering services, and training in Lagos, Nigeria. 
               Making every celebration sweeter since day one.
             </p>
           </div>
@@ -27,7 +27,7 @@ const Footer = () => {
             <div className="flex flex-col gap-2">
               <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">Our Services</Link>
               <Link to="/gallery" className="text-sm text-muted-foreground hover:text-primary transition-colors">Gallery</Link>
-              <Link to="/apply" className="text-sm text-muted-foreground hover:text-primary transition-colors">Baking School</Link>
+              <Link to="/apply" className="text-sm text-muted-foreground hover:text-primary transition-colors">Training</Link>
               <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</Link>
               <Link to="/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5">
                 <Lock size={12} />

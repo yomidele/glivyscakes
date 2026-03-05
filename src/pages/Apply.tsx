@@ -16,7 +16,7 @@ const Apply = () => {
             className="text-center mb-10"
           >
             <h1 className="font-heading text-3xl md:text-5xl font-bold mb-4">
-              Apply to Our <span className="text-gradient-gold">Baking School</span>
+              Join Our <span className="text-gradient-gold">Training</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Learn from experienced instructors and master the art of baking, pastry making, and cake decoration.
@@ -25,7 +25,7 @@ const Apply = () => {
 
           <div className="grid md:grid-cols-2 gap-12 items-start max-w-5xl mx-auto">
             <div className="rounded-xl overflow-hidden shadow-warm">
-              <img src={bakingSchool} alt="Baking school class" className="w-full h-auto" />
+              <img src={bakingSchool} alt="Training class" className="w-full h-auto" />
               <div className="p-6 bg-card">
                 <h3 className="font-heading text-lg font-semibold mb-2">Why Choose Us?</h3>
                 <ul className="text-sm text-muted-foreground space-y-2">

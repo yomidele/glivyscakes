@@ -47,6 +47,48 @@ export type Database = {
         }
         Relationships: []
       }
+      catering_quotes: {
+        Row: {
+          budget_range: string
+          created_at: string
+          email: string
+          event_date: string
+          event_type: string
+          full_name: string
+          id: string
+          location: string
+          notes: string | null
+          num_guests: number
+          phone: string
+        }
+        Insert: {
+          budget_range?: string
+          created_at?: string
+          email: string
+          event_date: string
+          event_type: string
+          full_name: string
+          id?: string
+          location: string
+          notes?: string | null
+          num_guests: number
+          phone: string
+        }
+        Update: {
+          budget_range?: string
+          created_at?: string
+          email?: string
+          event_date?: string
+          event_type?: string
+          full_name?: string
+          id?: string
+          location?: string
+          notes?: string | null
+          num_guests?: number
+          phone?: string
+        }
+        Relationships: []
+      }
       gallery: {
         Row: {
           category: string
