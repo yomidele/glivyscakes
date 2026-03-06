@@ -1,30 +1,52 @@
 import { Link } from "react-router-dom";
-import { Instagram, MapPin, Mail, Clock, Lock } from "lucide-react";
+import { Instagram, MapPin, Mail, Clock, Lock, Phone } from "lucide-react";
 import logo from "@/assets/logo.jpg";
+
+const WA_NUMBER = "2348051306562";
 
 const Footer = () => {
   return (
     <footer className="bg-card border-t border-border">
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* Brand */}
+      {/* Newsletter / CTA Strip */}
+      <div className="bg-primary">
+        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <img src={logo} alt="Glivyz Cakes & Events" className="h-12 w-auto rounded-full" />
-              <h3 className="font-heading text-2xl font-bold text-primary">
-                Glivyz Cakes & Events
-              </h3>
+            <h3 className="font-heading text-xl font-bold text-primary-foreground">GET IN TOUCH</h3>
+            <p className="text-primary-foreground/80 text-sm">Order cakes, book catering, or join our training program</p>
+          </div>
+          <a
+            href={`https://wa.me/${WA_NUMBER}?text=Hello%20Glivyz%20Cakes!`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-background text-foreground px-8 py-3 font-bold text-sm uppercase tracking-wider hover:bg-foreground hover:text-background transition-colors"
+          >
+            Chat on WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <div className="flex items-center gap-3 mb-4">
+              <img src={logo} alt="Glivyz Cakes & Events" className="h-12 w-12 rounded-full border-2 border-primary object-cover" />
+              <div>
+                <h3 className="font-heading text-lg font-bold text-primary">GLIVYZ</h3>
+                <p className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">Cakes & Events</p>
+              </div>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Premium bakery, catering services, and training in Lagos, Nigeria. 
-              Making every celebration sweeter since day one.
+              Making every celebration sweeter.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-heading text-lg font-semibold mb-4">Quick Links</h4>
-            <div className="flex flex-col gap-2">
+            <h4 className="font-heading text-sm font-bold uppercase tracking-wider mb-5 text-foreground">Quick Links</h4>
+            <div className="flex flex-col gap-3">
+              <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
               <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">Our Services</Link>
               <Link to="/gallery" className="text-sm text-muted-foreground hover:text-primary transition-colors">Gallery</Link>
               <Link to="/apply" className="text-sm text-muted-foreground hover:text-primary transition-colors">Training</Link>
@@ -36,13 +58,36 @@ const Footer = () => {
             </div>
           </div>
 
+          {/* Opening Hours */}
+          <div>
+            <h4 className="font-heading text-sm font-bold uppercase tracking-wider mb-5 text-foreground">Opening Hours</h4>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Monday - Friday</span>
+                <span className="text-foreground">8AM - 6PM</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Saturday</span>
+                <span className="text-foreground">9AM - 5PM</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Sunday</span>
+                <span className="text-primary">Closed</span>
+              </div>
+            </div>
+          </div>
+
           {/* Contact Info */}
           <div>
-            <h4 className="font-heading text-lg font-semibold mb-4">Contact</h4>
+            <h4 className="font-heading text-sm font-bold uppercase tracking-wider mb-5 text-foreground">Contact</h4>
             <div className="flex flex-col gap-3 text-sm text-muted-foreground">
               <div className="flex items-start gap-2">
                 <MapPin size={16} className="mt-0.5 shrink-0 text-primary" />
-                <span>5 David Daramola Street, Olaoluwa Bus Stop, Off Ikola Road, Command Alimosho Lagos, Nigeria</span>
+                <span>5 David Daramola Street, Olaoluwa Bus Stop, Off Ikola Road, Command Alimosho Lagos</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone size={16} className="shrink-0 text-primary" />
+                <a href="tel:+2348051306562" className="hover:text-primary transition-colors">+234 805 130 6562</a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={16} className="shrink-0 text-primary" />
@@ -50,11 +95,7 @@ const Footer = () => {
                   glivyzcakesandevents@gmail.com
                 </a>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock size={16} className="shrink-0 text-primary" />
-                <span>Wednesday 8:00 AM - 6:00 PM</span>
-              </div>
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-4 mt-3">
                 <a href="https://instagram.com/glivyzcakesandevents" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                   <Instagram size={20} />
                 </a>
@@ -68,9 +109,12 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border text-center">
+        <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Glivyz Cakes and Events. All rights reserved.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Lagos, Nigeria 🇳🇬
           </p>
         </div>
       </div>

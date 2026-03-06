@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.jpg";
 
 const navLinks = [
-  { to: "/", label: "Home" },
-  { to: "/services", label: "Services" },
-  { to: "/gallery", label: "Gallery" },
-  { to: "/apply", label: "Training" },
-  { to: "/contact", label: "Contact" },
+  { to: "/", label: "HOME" },
+  { to: "/services", label: "SERVICES" },
+  { to: "/gallery", label: "GALLERY" },
+  { to: "/apply", label: "TRAINING" },
+  { to: "/contact", label: "CONTACT" },
 ];
 
 const WA_NUMBER = "2348051306562";
@@ -28,6 +28,7 @@ const bookingOptions = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [bookMenuOpen, setBookMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -41,38 +42,59 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Glivyz Cakes & Events" className="h-12 md:h-16 w-auto rounded-full" />
-          <span className="font-heading text-lg md:text-xl font-bold text-primary">
-            Glivyz<span className="text-gradient-gold"> Cakes & Events</span>
-          </span>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? "bg-background/95 backdrop-blur-md border-b border-border" : "bg-transparent"
+    }`}>
+      <div className="container mx-auto px-4 flex items-center justify-between h-20">
+        <Link to="/" className="flex items-center gap-3">
+          <img src={logo} alt="Glivyz Cakes & Events" className="h-12 w-12 rounded-full border-2 border-primary object-cover" />
+          <div className="flex flex-col">
+            <span className="font-heading text-lg font-bold text-primary leading-tight">GLIVYZ</span>
+            <span className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">Cakes & Events</span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className={`text-sm font-medium transition-colors hover:text-primary ${
+              className={`text-xs font-semibold tracking-wider transition-colors hover:text-primary ${
                 location.pathname === link.to
                   ? "text-primary"
-                  : "text-muted-foreground"
+                  : "text-foreground/80"
               }`}
             >
               {link.label}
+              {location.pathname === link.to && (
+                <span className="block h-0.5 bg-primary mt-1 rounded-full" />
+              )}
             </Link>
           ))}
+        </div>
+
+        <div className="hidden lg:flex items-center gap-4">
+          <a
+            href={`https://wa.me/${WA_NUMBER}`}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            📞 +234 805 130 6562
+          </a>
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setBookMenuOpen(!bookMenuOpen)}
-              className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-1.5"
+              className="bg-primary text-primary-foreground px-6 py-2.5 text-xs font-bold tracking-wider uppercase hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
             >
               Book Service
-              <ChevronDown size={16} className={`transition-transform ${bookMenuOpen ? "rotate-180" : ""}`} />
+              <ChevronDown size={14} className={`transition-transform ${bookMenuOpen ? "rotate-180" : ""}`} />
             </button>
             <AnimatePresence>
               {bookMenuOpen && (
@@ -81,7 +103,7 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-warm overflow-hidden z-50"
+                  className="absolute right-0 mt-2 w-56 bg-card border border-border overflow-hidden z-50"
                 >
                   {bookingOptions.map((opt) => (
                     <a
@@ -90,7 +112,7 @@ const Navbar = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setBookMenuOpen(false)}
-                      className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                      className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
                     >
                       {opt.label}
                     </a>
@@ -104,7 +126,7 @@ const Navbar = () => {
         {/* Mobile Toggle */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-foreground p-2"
+          className="lg:hidden text-foreground p-2"
           aria-label="Toggle menu"
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -118,25 +140,24 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background border-b border-border overflow-hidden"
+            className="lg:hidden bg-background border-b border-border overflow-hidden"
           >
-            <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
+            <div className="container mx-auto px-4 py-6 flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
                   onClick={() => setIsOpen(false)}
-                  className={`text-base font-medium transition-colors ${
+                  className={`text-sm font-semibold tracking-wider transition-colors ${
                     location.pathname === link.to
                       ? "text-primary"
-                      : "text-muted-foreground"
+                      : "text-foreground/70"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="border-t border-border pt-3 flex flex-col gap-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Book Service</p>
+              <div className="border-t border-border pt-4 flex flex-col gap-2">
                 {bookingOptions.map((opt) => (
                   <a
                     key={opt.label}
@@ -144,7 +165,7 @@ const Navbar = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setIsOpen(false)}
-                    className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold text-center"
+                    className="bg-primary text-primary-foreground px-5 py-3 text-sm font-bold text-center uppercase tracking-wider"
                   >
                     {opt.label}
                   </a>
