@@ -7,46 +7,32 @@ import { motion } from "framer-motion";
 
 const Services = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-20">
         <ServicesSection />
 
-        {/* Cake Price Estimator */}
-        <section className="py-20 bg-card">
+        <section className="py-24 bg-card">
           <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-10"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+              <p className="text-primary text-xs font-semibold tracking-[0.3em] uppercase mb-3">Price Calculator</p>
               <h2 className="font-heading text-3xl md:text-5xl font-bold mb-4">
-                Cake Price <span className="text-gradient-gold">Estimator</span>
+                CAKE PRICE <span className="text-gradient-gold">ESTIMATOR</span>
               </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Get an instant price estimate for your dream cake.
-              </p>
+              <div className="w-16 h-1 bg-primary mx-auto" />
             </motion.div>
             <CakePriceEstimator />
           </div>
         </section>
 
-        {/* Catering Quote Form */}
-        <section className="py-20 bg-background">
+        <section className="py-24 bg-background">
           <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-10"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+              <p className="text-primary text-xs font-semibold tracking-[0.3em] uppercase mb-3">Events & Parties</p>
               <h2 className="font-heading text-3xl md:text-5xl font-bold mb-4">
-                Request a <span className="text-gradient-gold">Catering Quote</span>
+                REQUEST A <span className="text-gradient-gold">CATERING QUOTE</span>
               </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Tell us about your event and we'll get back to you with a custom quote.
-              </p>
+              <div className="w-16 h-1 bg-primary mx-auto" />
             </motion.div>
             <CateringQuoteForm />
           </div>
