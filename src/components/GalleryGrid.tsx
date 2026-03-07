@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 import weddingCake from "@/assets/wedding-cake.jpg";
 import smallChops from "@/assets/small-chops.jpg";
@@ -15,21 +16,47 @@ const defaultGalleryItems = [
   { src: smallChops, alt: "Small chops platter", category: "Catering" },
   { src: foodTray, alt: "Food tray", category: "Catering" },
   { src: lunchPacks, alt: "Lunch packs", category: "Catering" },
-  { src: bakingSchool, alt: "Baking school class", category: "School" },
+  { src: bakingSchool, alt: "Training class", category: "Training" },
 ];
 
-const categories = ["All", "Cakes", "Catering", "School"];
+const categories = ["All", "Cakes", "Catering", "Training", "Events"];
 
 interface GalleryProps {
-  items?: { src: string; alt: string; category: string }[];
   showFilters?: boolean;
 }
 
-const GalleryGrid = ({ items = defaultGalleryItems, showFilters = true }: GalleryProps) => {
+const GalleryGrid = ({ showFilters = true }: GalleryProps) => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [dbItems, setDbItems] = useState<{ src: string; alt: string; category: string; mediaType?: string }[]>([]);
 
-  const filtered = selectedCategory === "All" ? items : items.filter((item) => item.category === selectedCategory);
+  useEffect(() => {
+    const fetchGallery = async () => {
+      const { data } = await supabase
+        .from("gallery")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (data && data.length > 0) {
+        setDbItems(
+          data.map((item) => ({
+            src: item.image_url,
+            alt: item.title || "Gallery item",
+            category: item.category || "Cakes",
+            mediaType: item.media_type || "image",
+          }))
+        );
+      }
+    };
+    fetchGallery();
+  }, []);
+
+  // Combine database items (first) with default items
+  const allItems = [...dbItems, ...defaultGalleryItems];
+
+  const filtered =
+    selectedCategory === "All"
+      ? allItems
+      : allItems.filter((item) => item.category === selectedCategory);
 
   return (
     <>
@@ -62,9 +89,20 @@ const GalleryGrid = ({ items = defaultGalleryItems, showFilters = true }: Galler
             className="aspect-square overflow-hidden cursor-pointer group relative"
             onClick={() => setLightboxIndex(idx)}
           >
-            <img src={item.src} alt={item.alt} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
+            {('mediaType' in item && item.mediaType === "video") ? (
+              <video src={item.src} className="w-full h-full object-cover" muted />
+            ) : (
+              <img
+                src={item.src}
+                alt={item.alt}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                loading="lazy"
+              />
+            )}
             <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-colors flex items-center justify-center">
-              <span className="text-foreground opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold uppercase tracking-wider">View</span>
+              <span className="text-foreground opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold uppercase tracking-wider">
+                View
+              </span>
             </div>
           </motion.div>
         ))}
@@ -72,11 +110,53 @@ const GalleryGrid = ({ items = defaultGalleryItems, showFilters = true }: Galler
 
       <AnimatePresence>
         {lightboxIndex !== null && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-background/95 flex items-center justify-center p-4" onClick={() => setLightboxIndex(null)}>
-            <button onClick={() => setLightboxIndex(null)} className="absolute top-4 right-4 text-foreground/80 hover:text-foreground z-10"><X size={32} /></button>
-            <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + filtered.length) % filtered.length); }} className="absolute left-4 text-foreground/80 hover:text-foreground z-10"><ChevronLeft size={40} /></button>
-            <img src={filtered[lightboxIndex].src} alt={filtered[lightboxIndex].alt} className="max-w-full max-h-[85vh] object-contain" onClick={(e) => e.stopPropagation()} />
-            <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % filtered.length); }} className="absolute right-4 text-foreground/80 hover:text-foreground z-10"><ChevronRight size={40} /></button>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-background/95 flex items-center justify-center p-4"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 text-foreground/80 hover:text-foreground z-10"
+            >
+              <X size={32} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((lightboxIndex - 1 + filtered.length) % filtered.length);
+              }}
+              className="absolute left-4 text-foreground/80 hover:text-foreground z-10"
+            >
+              <ChevronLeft size={40} />
+            </button>
+            {('mediaType' in filtered[lightboxIndex] && filtered[lightboxIndex].mediaType === "video") ? (
+              <video
+                src={filtered[lightboxIndex].src}
+                controls
+                autoPlay
+                className="max-w-full max-h-[85vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <img
+                src={filtered[lightboxIndex].src}
+                alt={filtered[lightboxIndex].alt}
+                className="max-w-full max-h-[85vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((lightboxIndex + 1) % filtered.length);
+              }}
+              className="absolute right-4 text-foreground/80 hover:text-foreground z-10"
+            >
+              <ChevronRight size={40} />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

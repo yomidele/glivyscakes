@@ -16,6 +16,8 @@ interface CateringQuote {
   id: string; full_name: string; phone: string; email: string; event_type: string; event_date: string; num_guests: number; location: string; budget_range: string; notes: string; created_at: string;
 }
 
+const GALLERY_CATEGORIES = ["Cakes", "Catering", "Training", "Events"];
+
 const Admin = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,8 @@ const Admin = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [cateringQuotes, setCateringQuotes] = useState<CateringQuote[]>([]);
+  const [uploadCategory, setUploadCategory] = useState("Cakes");
+  const [uploadTitle, setUploadTitle] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
