@@ -6,17 +6,10 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Find the admin user
-  const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-  if (listError) return new Response(JSON.stringify({ error: listError.message }), { status: 500 });
+  const userId = "95d904aa-f385-4239-91db-07601bdbcca2";
 
-  const adminUser = users.find(u => u.email === "yomidele2120@gmail.com");
-  if (!adminUser) {
-    return new Response(JSON.stringify({ error: "Admin user not found" }), { status: 404 });
-  }
-
-  // Update password
-  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(adminUser.id, {
+  // Update password directly by ID
+  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
     password: "Kikelomo2120@",
     email_confirm: true,
   });
@@ -27,12 +20,12 @@ Deno.serve(async (req) => {
   const { data: existingRole } = await supabaseAdmin
     .from("user_roles")
     .select("id")
-    .eq("user_id", adminUser.id)
+    .eq("user_id", userId)
     .eq("role", "admin")
     .maybeSingle();
 
   if (!existingRole) {
-    await supabaseAdmin.from("user_roles").insert({ user_id: adminUser.id, role: "admin" });
+    await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "admin" });
   }
 
   return new Response(JSON.stringify({ success: true, message: "Admin password reset successfully" }));
