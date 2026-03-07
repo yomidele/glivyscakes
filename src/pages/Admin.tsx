@@ -84,9 +84,10 @@ const Admin = () => {
     const { error: uploadError } = await supabase.storage.from("gallery").upload(fileName, file);
     if (uploadError) { toast.error("Upload failed: " + uploadError.message); return; }
     const { data: { publicUrl } } = supabase.storage.from("gallery").getPublicUrl(fileName);
-    const { error: insertError } = await supabase.from("gallery").insert({ title: file.name.replace(/\.[^/.]+$/, ""), category: "Cakes", image_url: publicUrl, media_type: mediaType });
+    const title = uploadTitle.trim() || file.name.replace(/\.[^/.]+$/, "");
+    const { error: insertError } = await supabase.from("gallery").insert({ title, category: uploadCategory, image_url: publicUrl, media_type: mediaType });
     if (insertError) toast.error("Failed to save to gallery");
-    else { toast.success("Uploaded successfully!"); fetchGallery(); }
+    else { toast.success("Uploaded successfully!"); fetchGallery(); setUploadTitle(""); }
     e.target.value = "";
   };
 
