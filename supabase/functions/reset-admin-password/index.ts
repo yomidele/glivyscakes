@@ -7,40 +7,45 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const userId = "95d904aa-f385-4239-91db-07601bdbcca2";
-
-    // Delete existing user first
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    console.log("Delete result:", deleteError?.message || "success");
-
-    // Create new admin user
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    // Try signing in first to see if user/password works
+    const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
       email: "yomidele2120@gmail.com",
       password: "Kikelomo2120@",
-      email_confirm: true,
     });
 
-    if (createError) {
-      console.log("Create error:", createError.message);
-      return new Response(JSON.stringify({ error: createError.message }), { status: 500 });
+    console.log("Sign in test:", signInError?.message || "SUCCESS - login works!");
+    
+    if (!signInError) {
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: "Credentials already work!",
+        userId: signInData.user?.id 
+      }));
     }
 
-    console.log("New user ID:", newUser.user.id);
+    // Try with old password
+    const { data: oldData, error: oldError } = await supabaseAdmin.auth.signInWithPassword({
+      email: "yomidele2120@gmail.com",
+      password: "Kikelomo2120",
+    });
+    console.log("Old password test:", oldError?.message || "SUCCESS with old password");
 
-    // Add admin role
-    const { error: roleError } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: newUser.user.id, role: "admin" });
-
-    console.log("Role result:", roleError?.message || "success");
+    // Try signup with new creds
+    const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.signUp({
+      email: "yomidele2120@gmail.com",
+      password: "Kikelomo2120@",
+    });
+    console.log("Signup attempt:", signUpError?.message || "signup result", JSON.stringify(signUpData?.user?.identities?.length));
 
     return new Response(JSON.stringify({ 
-      success: true, 
-      userId: newUser.user.id,
-      message: "Admin user recreated successfully" 
+      signInError: signInError?.message,
+      oldPasswordError: oldError?.message,
+      oldPasswordSuccess: !oldError,
+      signUpError: signUpError?.message,
+      signUpIdentities: signUpData?.user?.identities?.length,
     }));
   } catch (e) {
-    console.error("Unexpected error:", e);
+    console.error("Error:", e);
     return new Response(JSON.stringify({ error: String(e) }), { status: 500 });
   }
 });
