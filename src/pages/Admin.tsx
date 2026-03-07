@@ -226,14 +226,32 @@ const Admin = () => {
 
         {activeTab === "gallery" && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-heading text-xl font-bold uppercase tracking-wider">Gallery</h2>
-              <label className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-primary/90 transition-colors">
-                <Upload size={16} /> Upload Media
-                <input type="file" accept="image/*,video/*" onChange={handleGalleryUpload} className="hidden" />
-              </label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+              <h2 className="font-heading text-xl font-bold uppercase tracking-wider">Gallery ({galleryItems.length})</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Title (optional)"
+                  value={uploadTitle}
+                  onChange={(e) => setUploadTitle(e.target.value)}
+                  className="px-3 py-2 bg-background border border-border text-foreground text-xs w-36 outline-none focus:ring-1 focus:ring-primary"
+                />
+                <select
+                  value={uploadCategory}
+                  onChange={(e) => setUploadCategory(e.target.value)}
+                  className="px-3 py-2 bg-background border border-border text-foreground text-xs outline-none focus:ring-1 focus:ring-primary"
+                >
+                  {GALLERY_CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                <label className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-primary/90 transition-colors">
+                  <Upload size={16} /> Upload
+                  <input type="file" accept="image/*,video/*" onChange={handleGalleryUpload} className="hidden" />
+                </label>
+              </div>
             </div>
-            {galleryItems.length === 0 ? <p className="text-muted-foreground text-sm py-10 text-center">No gallery items yet.</p> : (
+            {galleryItems.length === 0 ? <p className="text-muted-foreground text-sm py-10 text-center">No gallery items yet. Upload photos and videos above.</p> : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
                 {galleryItems.map(item => (
                   <div key={item.id} className="relative group overflow-hidden border border-border">
@@ -241,7 +259,10 @@ const Admin = () => {
                     <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button onClick={() => handleDeleteGalleryItem(item)} className="bg-destructive text-destructive-foreground p-2"><Trash2 size={16} /></button>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-background/80 px-2 py-1"><p className="text-xs truncate">{item.title}</p></div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-background/80 px-2 py-1">
+                      <p className="text-xs truncate">{item.title}</p>
+                      <p className="text-[10px] text-muted-foreground">{item.category}</p>
+                    </div>
                   </div>
                 ))}
               </div>
