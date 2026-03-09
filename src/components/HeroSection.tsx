@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ChevronDown, Award, Users, Star, Clock } from "lucide-react";
@@ -26,6 +26,17 @@ const stats = [
 
 const HeroSection = () => {
   const [showBookMenu, setShowBookMenu] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowBookMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -62,11 +73,11 @@ const HeroSection = () => {
               Making every celebration unforgettable with passion and flavor.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="relative w-full sm:w-auto" ref={dropdownRef}>
                 <button
                   onClick={() => setShowBookMenu(!showBookMenu)}
-                  className="bg-primary text-primary-foreground px-10 py-4 text-sm font-bold tracking-wider uppercase hover:bg-primary/90 transition-all inline-flex items-center justify-center gap-2 w-full"
+                  className="bg-primary text-primary-foreground px-10 py-4 text-sm font-bold tracking-wider uppercase hover:bg-primary/90 transition-all inline-flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   Book Service
                   <ChevronDown size={16} className={`transition-transform ${showBookMenu ? "rotate-180" : ""}`} />
@@ -77,7 +88,7 @@ const HeroSection = () => {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
-                      className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 bg-card border border-border overflow-hidden z-50"
+                      className="absolute left-0 right-0 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto mt-2 w-full sm:w-64 bg-card border border-border overflow-hidden z-50"
                     >
                       {bookingOptions.map((opt) => (
                         <a
@@ -85,6 +96,7 @@ const HeroSection = () => {
                           href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(opt.message)}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => setShowBookMenu(false)}
                           className="block px-5 py-3.5 text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
                         >
                           {opt.label}
@@ -96,7 +108,7 @@ const HeroSection = () => {
               </div>
               <Link
                 to="/apply"
-                className="border-2 border-primary text-primary px-10 py-4 text-sm font-bold tracking-wider uppercase hover:bg-primary hover:text-primary-foreground transition-all inline-flex items-center justify-center"
+                className="border-2 border-primary text-primary px-10 py-4 text-sm font-bold tracking-wider uppercase hover:bg-primary hover:text-primary-foreground transition-all inline-flex items-center justify-center w-full sm:w-auto"
               >
                 Join Training
               </Link>

@@ -1,53 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 const WA_NUMBER = "2348051306562";
 
-const cakeTypes = ["Birthday Cake", "Wedding Cake", "Celebration Cake"];
-const cakeSizes = ["6 inch", "8 inch", "10 inch", "12 inch"];
-const flavors = ["Vanilla", "Chocolate", "Red Velvet", "Fruit Cake"];
-const designStyles = ["Simple", "Buttercream", "Fondant", "Custom Design"];
-
-const basePrices: Record<string, number> = {
-  "Birthday Cake": 15000,
-  "Wedding Cake": 35000,
-  "Celebration Cake": 20000,
-};
-
-const sizeMultipliers: Record<string, number> = {
-  "6 inch": 1,
-  "8 inch": 1.4,
-  "10 inch": 1.9,
-  "12 inch": 2.5,
-};
-
-const flavorAdds: Record<string, number> = {
-  Vanilla: 0,
-  Chocolate: 2000,
-  "Red Velvet": 5000,
-  "Fruit Cake": 3000,
-};
-
-const designAdds: Record<string, number> = {
-  Simple: 0,
-  Buttercream: 5000,
-  Fondant: 10000,
-  "Custom Design": 15000,
-};
+interface PriceItem {
+  price_key: string;
+  price_label: string;
+  price_value: number;
+  category: string;
+}
 
 const CakePriceEstimator = () => {
   const [type, setType] = useState("");
   const [size, setSize] = useState("");
   const [flavor, setFlavor] = useState("");
   const [design, setDesign] = useState("");
+  const [prices, setPrices] = useState<PriceItem[]>([]);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const { data } = await supabase.from("cake_prices").select("price_key, price_label, price_value, category");
+      if (data) setPrices(data as PriceItem[]);
+    };
+    fetchPrices();
+  }, []);
+
+  const getByCategory = (cat: string) => prices.filter((p) => p.category === cat);
+  const getPrice = (label: string, cat: string) => {
+    const item = prices.find((p) => p.category === cat && p.price_label === label);
+    return item ? Number(item.price_value) : 0;
+  };
+
+  const baseItems = getByCategory("base");
+  const sizeItems = getByCategory("size");
+  const flavorItems = getByCategory("flavor");
+  const designItems = getByCategory("design");
 
   const canEstimate = type && size && flavor && design;
 
   const estimatedPrice = canEstimate
     ? Math.round(
-        (basePrices[type] || 0) * (sizeMultipliers[size] || 1) +
-          (flavorAdds[flavor] || 0) +
-          (designAdds[design] || 0)
+        getPrice(type, "base") * getPrice(size, "size") +
+          getPrice(flavor, "flavor") +
+          getPrice(design, "design")
       )
     : 0;
 
@@ -73,28 +69,28 @@ const CakePriceEstimator = () => {
           <label className="block text-xs font-semibold tracking-wider uppercase text-muted-foreground mb-2">Cake Type</label>
           <select value={type} onChange={(e) => setType(e.target.value)} className={selectClass}>
             <option value="">Select type</option>
-            {cakeTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+            {baseItems.map((t) => <option key={t.price_key} value={t.price_label}>{t.price_label}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-xs font-semibold tracking-wider uppercase text-muted-foreground mb-2">Cake Size</label>
           <select value={size} onChange={(e) => setSize(e.target.value)} className={selectClass}>
             <option value="">Select size</option>
-            {cakeSizes.map((s) => <option key={s} value={s}>{s}</option>)}
+            {sizeItems.map((s) => <option key={s.price_key} value={s.price_label}>{s.price_label}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-xs font-semibold tracking-wider uppercase text-muted-foreground mb-2">Flavor</label>
           <select value={flavor} onChange={(e) => setFlavor(e.target.value)} className={selectClass}>
             <option value="">Select flavor</option>
-            {flavors.map((f) => <option key={f} value={f}>{f}</option>)}
+            {flavorItems.map((f) => <option key={f.price_key} value={f.price_label}>{f.price_label}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-xs font-semibold tracking-wider uppercase text-muted-foreground mb-2">Design Style</label>
           <select value={design} onChange={(e) => setDesign(e.target.value)} className={selectClass}>
             <option value="">Select design</option>
-            {designStyles.map((d) => <option key={d} value={d}>{d}</option>)}
+            {designItems.map((d) => <option key={d.price_key} value={d.price_label}>{d.price_label}</option>)}
           </select>
         </div>
       </div>
