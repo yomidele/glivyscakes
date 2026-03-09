@@ -47,6 +47,33 @@ export type Database = {
         }
         Relationships: []
       }
+      cake_prices: {
+        Row: {
+          category: string
+          id: string
+          price_key: string
+          price_label: string
+          price_value: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          id?: string
+          price_key: string
+          price_label?: string
+          price_value?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          id?: string
+          price_key?: string
+          price_label?: string
+          price_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       catering_quotes: {
         Row: {
           budget_range: string
@@ -113,6 +140,30 @@ export type Database = {
           image_url?: string
           media_type?: string
           title?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          review_text: string
+          reviewer_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          review_text?: string
+          reviewer_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          review_text?: string
+          reviewer_name?: string
         }
         Relationships: []
       }
