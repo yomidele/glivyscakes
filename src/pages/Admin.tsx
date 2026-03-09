@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, Image as ImageIcon, Users, Settings, Download, Upload, Trash2, FileText } from "lucide-react";
+import { LogOut, Image as ImageIcon, Users, Settings, Download, Upload, Trash2, FileText, DollarSign, Star, Save } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
@@ -15,8 +15,20 @@ interface GalleryItem {
 interface CateringQuote {
   id: string; full_name: string; phone: string; email: string; event_type: string; event_date: string; num_guests: number; location: string; budget_range: string; notes: string; created_at: string;
 }
+interface CakePrice {
+  id: string; price_key: string; price_label: string; price_value: number; category: string;
+}
+interface Review {
+  id: string; reviewer_name: string; rating: number; review_text: string; created_at: string;
+}
 
 const GALLERY_CATEGORIES = ["Cakes", "Catering", "Training", "Events"];
+const PRICE_CATEGORIES = [
+  { key: "base", label: "Base Prices (₦)" },
+  { key: "size", label: "Size Multipliers" },
+  { key: "flavor", label: "Flavor Add-ons (₦)" },
+  { key: "design", label: "Design Add-ons (₦)" },
+];
 
 const Admin = () => {
   const [session, setSession] = useState<any>(null);
@@ -24,10 +36,13 @@ const Admin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [activeTab, setActiveTab] = useState<"applications" | "quotes" | "gallery" | "settings">("applications");
+  const [activeTab, setActiveTab] = useState<"applications" | "quotes" | "gallery" | "prices" | "reviews" | "settings">("applications");
   const [applications, setApplications] = useState<Application[]>([]);
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [cateringQuotes, setCateringQuotes] = useState<CateringQuote[]>([]);
+  const [cakePrices, setCakePrices] = useState<CakePrice[]>([]);
+  const [editedPrices, setEditedPrices] = useState<Record<string, number>>({});
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [uploadCategory, setUploadCategory] = useState("Cakes");
   const [uploadTitle, setUploadTitle] = useState("");
   const navigate = useNavigate();
@@ -45,7 +60,7 @@ const Admin = () => {
   }, []);
 
   useEffect(() => {
-    if (session) { fetchApplications(); fetchGallery(); fetchCateringQuotes(); }
+    if (session) { fetchApplications(); fetchGallery(); fetchCateringQuotes(); fetchCakePrices(); fetchReviews(); }
   }, [session]);
 
   const fetchApplications = async () => {
@@ -59,6 +74,14 @@ const Admin = () => {
   const fetchCateringQuotes = async () => {
     const { data } = await supabase.from("catering_quotes").select("*").order("created_at", { ascending: false });
     if (data) setCateringQuotes(data as CateringQuote[]);
+  };
+  const fetchCakePrices = async () => {
+    const { data } = await supabase.from("cake_prices").select("*").order("category, price_label");
+    if (data) { setCakePrices(data as CakePrice[]); setEditedPrices({}); }
+  };
+  const fetchReviews = async () => {
+    const { data } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
+    if (data) setReviews(data as Review[]);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -97,6 +120,29 @@ const Admin = () => {
     const { error } = await supabase.from("gallery").delete().eq("id", item.id);
     if (error) toast.error("Failed to delete");
     else { toast.success("Deleted!"); fetchGallery(); }
+  };
+
+  const handlePriceChange = (id: string, value: number) => {
+    setEditedPrices(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSavePrices = async () => {
+    const updates = Object.entries(editedPrices);
+    if (updates.length === 0) { toast.info("No changes to save."); return; }
+    let hasError = false;
+    for (const [id, value] of updates) {
+      const { error } = await supabase.from("cake_prices").update({ price_value: value, updated_at: new Date().toISOString() }).eq("id", id);
+      if (error) hasError = true;
+    }
+    if (hasError) toast.error("Some prices failed to update.");
+    else toast.success("Prices updated!");
+    fetchCakePrices();
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    if (error) toast.error("Failed to delete review");
+    else { toast.success("Review deleted!"); fetchReviews(); }
   };
 
   const exportCSV = (data: any[], headers: string[], filename: string) => {
@@ -147,12 +193,14 @@ const Admin = () => {
         <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto">
           {[
             { key: "applications" as const, label: "Training", icon: Users },
-            { key: "quotes" as const, label: "Catering Quotes", icon: FileText },
+            { key: "quotes" as const, label: "Quotes", icon: FileText },
             { key: "gallery" as const, label: "Gallery", icon: ImageIcon },
+            { key: "prices" as const, label: "Prices", icon: DollarSign },
+            { key: "reviews" as const, label: "Reviews", icon: Star },
             { key: "settings" as const, label: "Settings", icon: Settings },
           ].map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors -mb-px whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors -mb-px whitespace-nowrap ${
                 activeTab === key ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -229,21 +277,11 @@ const Admin = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <h2 className="font-heading text-xl font-bold uppercase tracking-wider">Gallery ({galleryItems.length})</h2>
               <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Title (optional)"
-                  value={uploadTitle}
-                  onChange={(e) => setUploadTitle(e.target.value)}
-                  className="px-3 py-2 bg-background border border-border text-foreground text-xs w-36 outline-none focus:ring-1 focus:ring-primary"
-                />
-                <select
-                  value={uploadCategory}
-                  onChange={(e) => setUploadCategory(e.target.value)}
-                  className="px-3 py-2 bg-background border border-border text-foreground text-xs outline-none focus:ring-1 focus:ring-primary"
-                >
-                  {GALLERY_CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
+                <input type="text" placeholder="Title (optional)" value={uploadTitle} onChange={(e) => setUploadTitle(e.target.value)}
+                  className="px-3 py-2 bg-background border border-border text-foreground text-xs w-36 outline-none focus:ring-1 focus:ring-primary" />
+                <select value={uploadCategory} onChange={(e) => setUploadCategory(e.target.value)}
+                  className="px-3 py-2 bg-background border border-border text-foreground text-xs outline-none focus:ring-1 focus:ring-primary">
+                  {GALLERY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
                 <label className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-primary/90 transition-colors">
                   <Upload size={16} /> Upload
@@ -251,7 +289,7 @@ const Admin = () => {
                 </label>
               </div>
             </div>
-            {galleryItems.length === 0 ? <p className="text-muted-foreground text-sm py-10 text-center">No gallery items yet. Upload photos and videos above.</p> : (
+            {galleryItems.length === 0 ? <p className="text-muted-foreground text-sm py-10 text-center">No gallery items yet.</p> : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
                 {galleryItems.map(item => (
                   <div key={item.id} className="relative group overflow-hidden border border-border">
@@ -263,6 +301,68 @@ const Admin = () => {
                       <p className="text-xs truncate">{item.title}</p>
                       <p className="text-[10px] text-muted-foreground">{item.category}</p>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "prices" && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-heading text-xl font-bold uppercase tracking-wider">Cake Prices</h2>
+              <button onClick={handleSavePrices}
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors">
+                <Save size={16} /> Save Changes
+              </button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              {PRICE_CATEGORIES.map(cat => (
+                <div key={cat.key} className="bg-card border border-border p-5">
+                  <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-4 text-primary">{cat.label}</h3>
+                  <div className="space-y-3">
+                    {cakePrices.filter(p => p.category === cat.key).map(price => (
+                      <div key={price.id} className="flex items-center justify-between gap-4">
+                        <label className="text-sm text-foreground">{price.price_label}</label>
+                        <input
+                          type="number"
+                          step="any"
+                          value={editedPrices[price.id] !== undefined ? editedPrices[price.id] : price.price_value}
+                          onChange={(e) => handlePriceChange(price.id, parseFloat(e.target.value) || 0)}
+                          className="w-32 px-3 py-2 bg-background border border-border text-foreground text-sm text-right outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "reviews" && (
+          <div>
+            <h2 className="font-heading text-xl font-bold uppercase tracking-wider mb-4">Customer Reviews ({reviews.length})</h2>
+            {reviews.length === 0 ? <p className="text-muted-foreground text-sm py-10 text-center">No reviews yet.</p> : (
+              <div className="space-y-3">
+                {reviews.map(review => (
+                  <div key={review.id} className="bg-card border border-border p-4 flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm">{review.reviewer_name}</span>
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} size={12} className={s <= review.rating ? "text-primary fill-primary" : "text-muted-foreground/30"} />
+                          ))}
+                        </div>
+                        <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate">{review.review_text}</p>
+                    </div>
+                    <button onClick={() => handleDeleteReview(review.id)} className="text-destructive hover:text-destructive/80 shrink-0">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>
