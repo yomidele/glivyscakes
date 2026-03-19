@@ -40,7 +40,7 @@ const HeroSection = () => {
 
   return (
     <>
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="hero-section no-theme relative min-h-screen flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center scale-105"
           style={{ backgroundImage: `url(${heroBg})` }}

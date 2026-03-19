@@ -40,7 +40,7 @@ const services = [
 
 const ServicesSection = () => {
   return (
-    <section className="py-24 bg-background">
+    <section className="services-section no-theme py-24 bg-background">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

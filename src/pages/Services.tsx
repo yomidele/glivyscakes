@@ -9,7 +9,7 @@ const Services = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div id="theme-container" data-theme="dark" className="pt-20">
+      <div className="pt-20">
         <ServicesSection />
 
         <section className="py-24 bg-card">
@@ -37,6 +37,7 @@ const Services = () => {
             <CateringQuoteForm />
           </div>
         </section>
+
       </div>
       <Footer />
     </div>

@@ -60,7 +60,7 @@ const Navbar = () => {
     if (themeContainer) {
       themeContainer.setAttribute("data-theme", theme);
     }
-    document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.setAttribute("data-theme", theme);
     window.localStorage.setItem("theme", theme);
   }, [theme]);
 

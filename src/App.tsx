@@ -20,9 +20,10 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
+      <div id="theme-container" data-theme="dark">
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/services" element={<Services />} />
           <Route path="/gallery" element={<Gallery />} />
@@ -33,6 +34,7 @@ const App = () => (
         </Routes>
         <FloatingWhatsApp />
       </BrowserRouter>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );
