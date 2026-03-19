@@ -56,7 +56,11 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    const themeContainer = document.getElementById("theme-container");
+    if (themeContainer) {
+      themeContainer.setAttribute("data-theme", theme);
+    }
+    document.documentElement.setAttribute("data-theme", "dark");
     window.localStorage.setItem("theme", theme);
   }, [theme]);
 

@@ -28,13 +28,11 @@
       (function() {
         try {
           var savedTheme = window.localStorage.getItem("theme");
-          if (savedTheme === "light" || savedTheme === "dark") {
-            document.documentElement.setAttribute("data-theme", savedTheme);
-          } else {
-            document.documentElement.setAttribute("data-theme", "dark");
-          }
+          document.documentElement.setAttribute("data-theme", "dark");
+          window.__savedTheme = savedTheme === "light" ? "light" : "dark";
         } catch (e) {
           document.documentElement.setAttribute("data-theme", "dark");
+          window.__savedTheme = "dark";
         }
       })();
     </script>

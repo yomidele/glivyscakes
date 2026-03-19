@@ -13,10 +13,12 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
-      <ServicesSection />
 
-      {/* Cake Price Estimator */}
-      <section className="py-24 bg-card">
+      <div id="theme-container" data-theme="dark">
+        <ServicesSection />
+
+        {/* Cake Price Estimator */}
+        <section className="py-24 bg-card">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -124,6 +126,7 @@ const Index = () => {
         </div>
       </section>
 
+      </div>
       <Footer />
     </div>
   );

@@ -9,7 +9,7 @@ const Services = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-20">
+      <div id="theme-container" data-theme="dark" className="pt-20">
         <ServicesSection />
 
         <section className="py-24 bg-card">
