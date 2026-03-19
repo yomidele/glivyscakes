@@ -29,6 +29,13 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [bookMenuOpen, setBookMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    if (typeof window !== "undefined") {
+      const storedTheme = window.localStorage.getItem("theme");
+      return storedTheme === "light" ? "light" : "dark";
+    }
+    return "dark";
+  });
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +54,15 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -82,6 +98,13 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            className="bg-muted/20 text-foreground px-3 py-2 text-xs font-semibold rounded-full border border-border hover:bg-muted transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          </button>
           <a
             href={`https://wa.me/${WA_NUMBER}`}
             className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -157,6 +180,13 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              <button
+                onClick={toggleTheme}
+                className="mt-2 rounded-full border border-border bg-muted/20 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === "dark" ? "☀️ Light Theme" : "🌙 Dark Theme"}
+              </button>
               <div className="border-t border-border pt-4 flex flex-col gap-2">
                 {bookingOptions.map((opt) => (
                   <a

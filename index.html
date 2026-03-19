@@ -24,6 +24,20 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      (function() {
+        try {
+          var savedTheme = window.localStorage.getItem("theme");
+          if (savedTheme === "light" || savedTheme === "dark") {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+          } else {
+            document.documentElement.setAttribute("data-theme", "dark");
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

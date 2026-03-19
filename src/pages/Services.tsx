@@ -25,7 +25,7 @@ const Services = () => {
           </div>
         </section>
 
-        <section className="py-24 bg-background">
+        <section id="request-catering-quote" className="py-24 bg-background">
           <div className="container mx-auto px-4">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
               <p className="text-primary text-xs font-semibold tracking-[0.3em] uppercase mb-3">Events & Parties</p>

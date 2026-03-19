@@ -33,31 +33,12 @@ const Index = () => {
           <CakePriceEstimator />
           <div className="text-center mt-10">
             <Link
-              to="/contact"
+              to="/services#request-catering-quote"
               className="inline-block border-2 border-primary text-primary px-10 py-3 font-bold text-sm uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-colors"
             >
               Request Catering Quote
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* Customer Reviews */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <p className="text-primary text-xs font-semibold tracking-[0.3em] uppercase mb-3">Testimonials</p>
-            <h2 className="font-heading text-3xl md:text-5xl font-bold mb-4">
-              CUSTOMER <span className="text-gradient-gold">REVIEWS</span>
-            </h2>
-            <div className="w-16 h-1 bg-primary mx-auto" />
-          </motion.div>
-          <CustomerReviews />
         </div>
       </section>
 
@@ -85,6 +66,25 @@ const Index = () => {
               View Full Gallery
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Customer Reviews */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <p className="text-primary text-xs font-semibold tracking-[0.3em] uppercase mb-3">Testimonials</p>
+            <h2 className="font-heading text-3xl md:text-5xl font-bold mb-4">
+              CUSTOMER <span className="text-gradient-gold">REVIEWS</span>
+            </h2>
+            <div className="w-16 h-1 bg-primary mx-auto" />
+          </motion.div>
+          <CustomerReviews />
         </div>
       </section>
 
